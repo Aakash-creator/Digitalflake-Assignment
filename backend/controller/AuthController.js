@@ -1,125 +1,109 @@
+// Import necessary modules
 const { Authadmin } = require("../models/AuthModel");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
 
-// check if user is logged in and provide JWT token if he is.
-
+// Function to log in admin users and provide JWT tokens
 const loginAdmin = async (req, res) => {
   try {
+    // Extract email and password from request body
     const { email, password } = req.body;
+
+    // Find admin user by email
     const isThere = await Authadmin.findOne({ email });
 
-    if (isThere === null) {
-      res.json("Admin does not exist, register admin before trying"); //.status(400)
-    } else {
-      const userId = isThere._id;
-      if (isThere.email === email) {
-        if (await bcrypt.compare(password, isThere.password)) {
-          const accesstoken = JWT.sign({ email, userId }, process.env.JWTACCESSTOKENSECRET, {
-            expiresIn: "10h",
-          });
-          const refreshtoken = JWT.sign({ email, userId }, process.env.JWTREFRESHTOKENSECRET, {
-            expiresIn: "12h",
-          });
+    // If admin user does not exist, return error
+    if (!isThere) {
+      return res.status(400).json({ error: "Admin does not exist, register admin before trying" });
+    }
 
-          res.cookie("accesstoken", accesstoken, {
-            // maxAge: 60000,
-            httpOnly: true,
-            secure: true,
-            // sameSite: "Strict",
-          });
+    // If admin user exists, check password
+    if (isThere.email === email) {
+      const passwordMatch = await bcrypt.compare(password, isThere.password);
+      if (passwordMatch) {
+        // If password matches, generate JWT tokens
+        const userId = isThere._id;
+        const accesstoken = JWT.sign({ email, userId }, process.env.JWTACCESSTOKENSECRET, {
+          expiresIn: "10h",
+        });
+        const refreshtoken = JWT.sign({ email, userId }, process.env.JWTREFRESHTOKENSECRET, {
+          expiresIn: "12h",
+        });
 
-          res.cookie("refreshtoken", refreshtoken, {
-            // maxAge: 300000,
-            httpOnly: true,
-            secure: true,
-            sameSite: "Strict",
-          });
-          res.status(200).json("Login Sucessfull!");
-        } else {
-          res.json("Incorrect Credentials");
-        }
+        // Set cookies with JWT tokens
+        res.cookie("accesstoken", accesstoken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+        });
+
+        res.cookie("refreshtoken", refreshtoken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "Strict",
+        });
+
+        // Return success message
+        return res.status(200).json({ message: "Login Successful!" });
+      } else {
+        // If password doesn't match, return error
+        return res.status(401).json({ error: "Incorrect Credentials" });
       }
     }
   } catch (err) {
-    console.log(err);
+    // Handle any errors
+    console.error(err);
     res.status(500).send("Internal Server Error");
   }
 };
 
-//  add new admin
+// Function to register a new admin user
 const registerAdmin = async (req, res) => {
   try {
+    // Extract name, email, and password from request body
     const { name, email, password } = req.body;
-    const isThere = await admin.findOne({ email }); //check if user exists returns an object|null
+
+    // Check if all required fields are provided
     if (name && email && password) {
+      // Check if admin user already exists with provided email
+      const isThere = await admin.findOne({ email });
       if (isThere === null) {
-        //if null then then user does not exist
+        // If admin user doesn't exist, hash password and create new admin user
         const hashPass = await bcrypt.hash(password, 12);
         const data = await admin.create({ name, email, password: hashPass }).then((dt) => {
-          //create user user
-          // console.log(dt); // remove later
-          res.status(201).json("Admin Created Sucessfully");
+          res.status(201).json("Admin Created Successfully");
         });
       } else {
+        // If admin user already exists, return error
         if (isThere.email === email) {
-          res.json(`Admin already exist using email ${email}`);
+          res.json(`Admin already exists using email ${email}`);
         }
       }
     } else {
+      // If any required fields are missing, return error
       res.json("Name, Email and Password required.");
     }
   } catch (err) {
+    // Handle any errors
     console.log(err);
     res.status(500).json("Internal Server Error");
   }
 };
 
-// check if admin is valid using jwt tokens
-
-const isAdminValid = async (req, res, next) => {
+// Function to logout admin user
+const logoutAdmin = async (req, res) => {
   try {
-    const accesstoken = req.cookies.accesstoken;
-    const refreshtoken = req.cookies.refreshtoken;
+    // Clear cookies by setting them to expire immediately
+    res.clearCookie("accesstoken");
+    res.clearCookie("refreshtoken");
 
-    if (!accesstoken) {
-      if (!refreshtoken) {
-        return res.status(401).json({ message: "Admin not logged in" });
-      } else {
-        JWT.verify(refreshtoken, process.env.JWTREFRESHTOKENSECRET, (err, decode) => {
-          if (err) {
-            console.log(err);
-            return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-          } else {
-            const email = decode.useremail;
-            const userId = decode.userId;
-            const newAccessToken = JWT.sign({ email, userId }, process.env.JWTACCESSTOKENSECRET, {
-              expiresIn: "10m",
-            });
-
-            res.cookie("accesstoken", newAccessToken, {
-              maxAge: 60000,
-              httpOnly: true,
-              secure: true,
-            });
-            next();
-          }
-        });
-      }
-    } else {
-      JWT.verify(accesstoken, process.env.JWTACCESSTOKENSECRET, (err, decode) => {
-        if (err) {
-          console.log(err);
-          return res.status(401).json({ valid: false, message: "Invalid access token" });
-        } else {
-          return next();
-        }
-      });
-    }
+    // Send a response indicating successful logout
+    res.status(200).json("Logged out successfully");
   } catch (err) {
+    // Handle any errors
     console.log(err);
-    return res.status(500).send("Internal Server Error");
+    res.status(500).send("Internal Server Error");
   }
 };
 
-module.exports = { loginAdmin, registerAdmin, isAdminValid };
+// Export functions for use in other modules
+module.exports = { loginAdmin, registerAdmin, logoutAdmin };

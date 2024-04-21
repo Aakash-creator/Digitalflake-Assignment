@@ -1,13 +1,16 @@
 const Home = () => {
   return (
     <>
-      <div className="flex items-center  my-6 justify-center mb-6 text-2xl  text-gray-900 dark:text-white">
-        <img className="w-8 flex items-center h-8 mr-2" src="../public\vite.svg" alt="" />
-        <hr />
-        <div>
-          <span className=" font-semibold">digital</span>flake
+      <div className="flex flex-col items-center  mt-40 my-6 justify-center mb-6 text-2xl  text-gray-900 dark:text-white">
+        <div className="  p-3">
+          <img src="../D.png" alt="" />
         </div>
-        <p className="  flex justify-center">Welcome to Digitalflake Admin</p>
+        <div className="text-4xl	">
+          <span className=" font-bold">digital</span>flake
+        </div>
+        <div className="  p-3">
+          <p className="  flex flex-row justify-center text-base	">Welcome to Digitalflake Admin</p>
+        </div>
       </div>
     </>
   );

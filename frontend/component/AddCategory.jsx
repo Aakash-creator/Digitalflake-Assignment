@@ -1,17 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const AddCategory = () => {
-  const [categoryname, setCategoryname] = useState();
-  const [description, setDescription] = useState();
-  const [status, setStatus] = useState();
+  const [categoryname, setCategoryname] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("");
+  const navigate = useNavigate();
 
   const handelsubmit = async (e) => {
     e.preventDefault();
-    axios.post("http://localhost:3535/category/addcategory", { categoryname, description, status }).then((res) => {
-      console.log(res.data);
-    });
+    console.log(categoryname + description + status);
+
+    axios
+      .post("http://localhost:3535/category/addcategory", { categoryname, description, status })
+      .then((res) => {
+        if (res.data == "category added sucessfully") {
+          alert("category added");
+          navigate("/category");
+        }
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -58,7 +70,9 @@ const AddCategory = () => {
             </label>
             <div>
               <button type="submit">Save</button>
-              <button>Cancel</button>
+              <Link to="/category">
+                <button>Cancel</button>
+              </Link>
             </div>
           </div>
         </form>

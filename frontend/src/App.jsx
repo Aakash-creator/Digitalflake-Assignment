@@ -8,6 +8,7 @@ import Category from "../pages/Category";
 import Dashboard from "../pages/Home";
 import PageNotFound from "../pages/PageNotFound";
 import Products from "../pages/Products";
+import ResetPassword from "../pages/ResetPassword";
 import SignIn from "../pages/SignIn";
 import { Routes, Route } from "react-router-dom";
 
@@ -28,6 +29,7 @@ function App() {
             <Route path="/products/addproducts/:id" element={<EditProduct />} />
           </Route>
         </Route>
+        <Route path="/resetpassword/${admin._id}/${token}" element={<ResetPassword />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>

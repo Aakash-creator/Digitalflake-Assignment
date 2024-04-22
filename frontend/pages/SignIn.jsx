@@ -6,6 +6,7 @@ const SignIn = () => {
   const [email, setemail] = useState();
   const [password, setpassword] = useState();
   const navigate = useNavigate();
+  const [showForgetPasswordDialog, setShowForgetPasswordDialog] = useState(false);
 
   const handelsubmit = (e) => {
     e.preventDefault();
@@ -28,6 +29,25 @@ const SignIn = () => {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const handleForgetPassword = () => {
+    setShowForgetPasswordDialog(true);
+  };
+
+  const handleCloseForgetPasswordDialog = () => {
+    setShowForgetPasswordDialog(false);
+  };
+
+  const handleSendResetPasswordEmail = () => {
+    try {
+      axios.post("http://localhost:3535/forgotpassword", { email }).then((res) => {
+        console.log(res.data);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+    handleCloseForgetPasswordDialog();
   };
 
   return (
@@ -85,12 +105,53 @@ const SignIn = () => {
                 >
                   Login
                 </button>
-                <button className="text-sm font-light text-gray-500 dark:text-gray-400">Forget Password?</button>
+                <button onClick={handleForgetPassword} className="text-sm font-light text-gray-500 dark:text-gray-400">
+                  Forget Password?
+                </button>
               </form>
             </div>
           </div>
         </div>
       </section>
+      {/* Forget Password Dialog */}
+      {showForgetPasswordDialog && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-25">
+          <div className="bg-white p-5 rounded ">
+            <div>
+              <div className="flex flex-row justify-center mt-3 mb-3">
+                <p className="justify-center text-primary pt-1 ml-3 font-semibold text-lg">Did you forget your password?</p>
+              </div>
+              <p className="flex flex-row justify-center mt-3 mb-3 px-3">Enter your email address and we will send you a link to restore password</p>
+            </div>
+            <div className=" flex flex-col justify-center content-center w-full px-20 my-5">
+              <label htmlFor="email" className=" block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Your email
+              </label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                onChange={(e) => {
+                  setemail(e.target.value);
+                }}
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="name@company.com"
+                required=""
+              />
+            </div>
+            <div className="flex flex-col justify-center px-20">
+              <div className=" flex flex-col justify-center content-center">
+                <button className="bg-primary text-white px-4 py-2 rounded-full mt-4" onClick={handleSendResetPasswordEmail}>
+                  Request reset link
+                </button>
+                <button className="mr-3 bg-white px-4 py-2 underline" onClick={handleCloseForgetPasswordDialog}>
+                  Back to login
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

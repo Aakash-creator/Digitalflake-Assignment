@@ -2,6 +2,7 @@
 const { Authadmin } = require("../models/AuthModel");
 const bcrypt = require("bcrypt");
 const JWT = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 // Function to log in admin users and provide JWT tokens
 const loginAdmin = async (req, res) => {
@@ -65,11 +66,11 @@ const registerAdmin = async (req, res) => {
     // Check if all required fields are provided
     if (name && email && password) {
       // Check if admin user already exists with provided email
-      const isThere = await admin.findOne({ email });
+      const isThere = await Authadmin.findOne({ email });
       if (isThere === null) {
         // If admin user doesn't exist, hash password and create new admin user
         const hashPass = await bcrypt.hash(password, 12);
-        const data = await admin.create({ name, email, password: hashPass }).then((dt) => {
+        const data = await Authadmin.create({ name, email, password: hashPass }).then((dt) => {
           res.status(201).json("Admin Created Successfully");
         });
       } else {
@@ -105,5 +106,82 @@ const logoutAdmin = async (req, res) => {
   }
 };
 
+const resetPassword = (req, res) => {
+  const { email } = req.body;
+
+  // Find the admin by email
+  Authadmin.findOne({ email: email })
+    .then((admin) => {
+      if (!admin) {
+        return res.send({ Status: "Admin not existed" });
+      }
+
+      // Generate JWT token
+      const token = JWT.sign({ id: admin._id }, process.env.JWTACCESSTOKENSECRET, { expiresIn: "1d" });
+
+      const email = process.env.EMAIL;
+      const mailPass = process.env.PASSWORD;
+
+      console.log(email + " " + mailPass);
+
+      // Create transporter for sending email
+      var transporter = nodemailer.createTransport({
+        service: "gmail",
+        port: 5173,
+        secure: true,
+        debug: true,
+        auth: {
+          user: email,
+          pass: mailPass,
+        },
+        tls: {
+          rejectUnauthorized: true,
+        },
+      });
+
+      // Prepare email options
+      var mailOptions = {
+        from: email,
+        to: admin.email, // Use admin's email here
+        subject: "Reset Password Link",
+        text: `http://localhost:5173/resetpassword/${admin._id}/${token}`,
+      };
+
+      // Send email
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+          return res.status(500).send({ Status: "Error sending email" });
+        } else {
+          return res.send({ Status: "Success" });
+        }
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+      return res.status(500).send({ Status: "Internal Server Error" });
+    });
+};
+
+const updatePassword = (req, res) => {
+  const { id, token } = req.params;
+  const { password } = req.body;
+
+  jwt.verify(token, process.env.JWTACCESSTOKENSECRET, (err, decoded) => {
+    if (err) {
+      return res.json({ Status: "Error with token" });
+    } else {
+      bcrypt
+        .hash(password, 12)
+        .then((hash) => {
+          AdminModel.findByIdAndUpdate({ _id: id }, { password: hash })
+            .then((u) => res.send({ Status: "Success" }))
+            .catch((err) => res.send({ Status: err }));
+        })
+        .catch((err) => res.send({ Status: err }));
+    }
+  });
+};
+
 // Export functions for use in other modules
-module.exports = { loginAdmin, registerAdmin, logoutAdmin };
+module.exports = { loginAdmin, registerAdmin, logoutAdmin, resetPassword, updatePassword };

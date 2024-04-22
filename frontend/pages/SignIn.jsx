@@ -34,14 +34,16 @@ const SignIn = () => {
     <>
       <section className="bg-gray-50 dark:bg-gray-900">
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-          <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-            <Link to="#" className="flex items-center  my-6 justify-center mb-6 text-2xl  text-gray-900 dark:text-white">
-              <img className="w-8 flex items-center h-8 mr-2" src="../public\vite.svg" alt="" />
-              <hr />
-              <div>
-                <span className=" font-semibold">digital</span>flake
-              </div>
-            </Link>
+          <div className="w-full  bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+            <div className=" flex flex-col">
+              <Link to="#" className="flex flex-col items-center  my-6 justify-center mb-3 text-2xl  text-gray-900 dark:text-white">
+                <img className="w-8 flex items-center h-8 mr-2" src="../D60.png" alt="" />
+                <hr />
+                <div>
+                  <span className=" font-semibold">digital</span>flake
+                </div>
+              </Link>
+            </div>
             <p className="  flex justify-center">Welcome to Digitalflake Admin</p>
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <form className="space-y-4 md:space-y-6" onSubmit={handelsubmit}>
@@ -79,7 +81,7 @@ const SignIn = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  className="w-full text-white bg-primary hover:bg-primary focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary dark:hover:bg-primary dark:focus:ring-blue-800"
                 >
                   Login
                 </button>

@@ -10,6 +10,6 @@ const registerModel = Schema(
   { timestamps: true }
 );
 
-const Authadmin = mongoose.model("admin-registeration", registerModel);
+const Authadmin = mongoose.model("admin", registerModel);
 
 module.exports = { Authadmin };

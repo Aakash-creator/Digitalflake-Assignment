@@ -1,19 +1,19 @@
-import { Link, useNavigate } from "react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { Link, useNavigate } from "react-router-dom";
 
 // Component for adding a new product
 const AddProducts = () => {
   // State variables for form inputs
+  const navigate = useNavigate();
   const [options, setOptions] = useState([]); // State for category options
   const [category, setCategory] = useState(""); // State for selected category
   const [productname, setProductName] = useState(""); // State for product name
   const [packsize, setPackSize] = useState(""); // State for pack size
   const [mrp, setMRP] = useState(""); // State for MRP
   const [status, setStatus] = useState(""); // State for product status
-  const navigate = useNavigate();
 
   // Fetch category options from backend on component mount
   useEffect(() => {
@@ -52,7 +52,6 @@ const AddProducts = () => {
     <>
       <div>
         <div className=" p-3 flex felx-row">
-          {/* Link to navigate back to products page */}
           <Link to="/products" className="p-2">
             <FontAwesomeIcon icon={faArrowLeft} />
           </Link>

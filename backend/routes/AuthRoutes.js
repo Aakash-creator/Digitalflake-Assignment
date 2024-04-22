@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { loginAdmin, registerAdmin, logoutAdmin } = require("../controller/AuthController");
+const { loginAdmin, registerAdmin, logoutAdmin, resetPassword, updatePassword } = require("../controller/AuthController");
 
 // Route to test if authentication router is working
 router.get("/login", (req, res) => {
@@ -20,6 +20,12 @@ router.post("/logout", logoutAdmin);
 router.get("/test", (req, res) => {
   res.send("working at auth.js");
 });
+
+// Route to send mail to reset password
+router.post("/forgotpassword", resetPassword);
+
+// Route to reset password
+router.post("/resetpassword/${admin._id}/${token}", updatePassword);
 
 // Export router for use in other modules
 module.exports = router;
